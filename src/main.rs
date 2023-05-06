@@ -1,7 +1,7 @@
 use std::time;
 
 use dfdx::{
-    prelude::{Linear, Module, ModuleBuilder, ReLU, Tanh},
+    nn::builders::*,
     shapes::Rank1,
     tensor::{AsArray, Cpu, Tensor, ZerosTensor},
 };
@@ -22,18 +22,19 @@ fn main() {
     bench::<16>();
     bench::<32>();
     bench::<64>();
+    bench::<128>();
 }
 
 fn bench<const N: usize>() {
     let cpu: Cpu = Default::default();
 
-    let model: Model<N> = cpu.build_module();
+    let model = cpu.build_module::<Model<N>, f32>();
 
     let start_time = time::Instant::now();
     let mut result = 0.0;
 
     for _ in 0..RUNS {
-        let input_tensor: Tensor<Rank1<N>> = cpu.zeros();
+        let input_tensor: Tensor<Rank1<N>, f32, Cpu> = cpu.zeros();
         let output = model.forward(input_tensor);
         result += output.array()[0];
     }
